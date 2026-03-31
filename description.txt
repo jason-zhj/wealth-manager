@@ -1,0 +1,60 @@
+[What to do]
+Build a web portal for me to record & track personal wealth status over time.
+
+User flow:
+- login with google
+- After login, redirect to home page
+
+# Home page:
+see a dashboard, showing:
+- current total wealth (in SGD by default, but allow changing to CNY or USD)
+- difference (in both absolute number and percentage) compared to previous record, one year ago
+- pie chart of the current asset type breakdown
+
+The page should have a sidebar with the following menu items:
+- home page
+- Records → lead to the records listing page
+- Add record → lead to new record page
+- log out
+
+# New record page:
+It shows a form for user to enter:
+- date
+- assets (a list): allow use to add/remove/edit item
+
+Each asset item contains:
+- category: bankAccount/fund/equity/cpf
+- allow user to enter other category and make it available in the option list
+- currency: SGD/USD
+- place type: bank/broker/cpf/others
+  - allow user to enter other place type and make it available in the option list
+- place:
+  - bank: UOB/StandardChartered/DBS
+  - broker: moomoo/webull/longbridge/morgenStanley
+  - CPF: cpf
+  - allow user to enter other place and make it available in the option list
+  - amount
+  - name: free-text (e.g. fund name, share name)
+  - expected annual yield (%)
+  - risk level: low/medium/high
+  - details: free-text
+
+# Records listing page:
+- It shows a table of past records in descending order of date.
+- Each row shows: total wealth, date of record, total annual yield, overall risk level
+- Each row has a view button, leading to the record detail page
+
+# Record detail page:
+Similar to the New record page, but it shows an existing record, allowing user to edit.
+It has two buttons at the bottom:
+- save: save the change, show a success pop-up message
+- close: go back to records listing page
+
+[Tech stack]
+Host the frontend on github pages
+- Create a new repo
+- Create a standard .gitignore file for a Go project and ensure no environment variables or binaries are tracked
+
+Use supabase as the DB (use anon key)
+- Put the key in GitHub Repository Secrets
+- Enable Row Level Security and a policy that allows everyone to only read/write their own records
