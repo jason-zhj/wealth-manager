@@ -39,10 +39,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithGoogle = async () => {
+    // Use Vite's configured base (e.g. /wealth-manager/) so the callback lands on the SPA root
+    // in both local dev and GitHub Pages.
+    const redirectTo = new URL(import.meta.env.BASE_URL, window.location.origin).toString();
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/wealth-manager/',
+        redirectTo,
       },
     });
   };
