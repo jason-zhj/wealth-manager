@@ -1,50 +1,91 @@
-# React + TypeScript + Vite
+# Wealth Manager
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A personal wealth tracking web portal. Record snapshots of your assets over time, monitor your portfolio performance, and plan for your financial goals.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Records
+- Create dated wealth snapshots, each containing one or more assets
+- Assets carry: category, currency, place type, place, amount, name, expected annual yield, risk level, and optional notes
+- Dropdown options are pre-filtered by category (e.g. selecting "Bank Account" only shows "Bank" as a place type)
+- Add custom categories, place types, and places inline
 
-## Expanding the ESLint configuration
+### Record Detail
+- View a record in a clean read-only card layout, grouped by asset category
+- Asset breakdown charts: by category (with drill-down to place type or place), by currency, and by risk level
+- Click **Edit** to enter edit mode — make changes across all assets, then **Save** or **Discard**
+- Adding a new asset auto-scrolls to it and briefly highlights it
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### Dashboard (Home)
+- Total wealth with change vs previous record and vs one year ago
+- Asset breakdown charts: by category, by currency, and by risk level
+- **30-year wealth projection** line chart — each asset compounds at its own expected annual yield; hover to see the year and projected value
+- **Financial goal calculator** — set a target amount and number of years, and get:
+  - Years to reach goal at current yields
+  - Required annual yield to hit the goal on time
+  - Extra monthly savings needed
+  - Suggestions based on simple rules (Rule of 72, gap analysis, on-track confirmation)
+  - Goal inputs are saved to `localStorage` and persist between sessions
 
-- Configure the top-level `parserOptions` property like this:
+## How to Run Locally
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Prerequisites
+
+- Node.js 18+ (use `nvm use` if you have [nvm](https://github.com/nvm-sh/nvm))
+- A [Supabase](https://supabase.com) project with the schema from `supabase-setup.sql`
+
+### Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Create your local env file
+cp .env.example .env
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+Open `.env` and fill in your Supabase credentials:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
 ```
+VITE_SUPABASE_URL=https://<your-project-ref>.supabase.co
+VITE_SUPABASE_ANON_KEY=<anon key from Supabase Settings → API>
+```
+
+### Database
+
+Run `supabase-setup.sql` in the Supabase SQL Editor to create all tables (`records`, `record_items`, `custom_options`), indexes, Row Level Security policies, and triggers.
+
+### Start the dev server
+
+```bash
+npm run dev
+```
+
+The app runs at [http://localhost:5173/wealth-manager/](http://localhost:5173/wealth-manager/) and supports Google OAuth sign-in via Supabase.
+
+### Build for production
+
+```bash
+npm run build
+```
+
+## Deployment
+
+Push to `main` — GitHub Actions builds and deploys to GitHub Pages automatically.
+
+**Required GitHub repository secrets** (Settings → Secrets and variables → Actions):
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+GitHub Pages must be configured to use **GitHub Actions** as the source (Settings → Pages).
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18 + TypeScript, Vite 5 |
+| Routing | react-router-dom v6 (SPA, `basename="/wealth-manager"`) |
+| Charts | Recharts |
+| Backend / Auth | Supabase (Postgres + Google OAuth) |
+| Hosting | GitHub Pages |
+| CI/CD | GitHub Actions |

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { RecordItem, CustomOption } from '../lib/types';
 import { fetchCustomOptions } from '../lib/api';
 import AssetItemForm from './AssetItemForm';
@@ -24,6 +24,16 @@ const emptyItem = (): RecordItem => ({
   details: '',
 });
 
+export function validateItems(items: RecordItem[]): string {
+  if (items.length === 0) return 'Please add at least one asset.';
+  for (const item of items) {
+    if (!item.category || !item.place_type || !item.place) {
+      return 'Please fill in Category, Place Type, and Place for each asset.';
+    }
+  }
+  return '';
+}
+
 export default function RecordForm({
   initialDate,
   initialItems,
@@ -36,6 +46,18 @@ export default function RecordForm({
   const [customOptions, setCustomOptions] = useState<CustomOption[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [newItemIndex, setNewItemIndex] = useState<number | null>(null);
+
+  // Refs map: index → div element for scrolling
+  const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  const setItemRef = useCallback((index: number, el: HTMLDivElement | null) => {
+    if (el) {
+      itemRefs.current.set(index, el);
+    } else {
+      itemRefs.current.delete(index);
+    }
+  }, []);
 
   useEffect(() => {
     fetchCustomOptions()
@@ -43,12 +65,30 @@ export default function RecordForm({
       .catch(err => console.error('Failed to load custom options', err));
   }, []);
 
+  // Scroll to new item after it renders, then clear highlight after 2s
+  useEffect(() => {
+    if (newItemIndex === null) return;
+    const el = itemRefs.current.get(newItemIndex);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    const timer = setTimeout(() => setNewItemIndex(null), 2000);
+    return () => clearTimeout(timer);
+  }, [newItemIndex, items.length]);
+
+  const handleAddItem = () => {
+    const nextIndex = items.length;
+    setItems(prev => [...prev, emptyItem()]);
+    setNewItemIndex(nextIndex);
+  };
+
   const handleItemChange = (index: number, field: keyof RecordItem, value: string | number) => {
     setItems(prev => prev.map((item, i) => i === index ? { ...item, [field]: value } : item));
   };
 
   const handleItemRemove = (index: number) => {
     setItems(prev => prev.filter((_, i) => i !== index));
+    if (newItemIndex === index) setNewItemIndex(null);
   };
 
   const handleCustomOptionAdded = (option: CustomOption) => {
@@ -63,15 +103,10 @@ export default function RecordForm({
       setError('Please select a date.');
       return;
     }
-    if (items.length === 0) {
-      setError('Please add at least one asset.');
+    const itemError = validateItems(items);
+    if (itemError) {
+      setError(itemError);
       return;
-    }
-    for (const item of items) {
-      if (!item.category || !item.place_type || !item.place) {
-        setError('Please fill in Category, Place Type, and Place for each asset.');
-        return;
-      }
     }
 
     setSaving(true);
@@ -103,7 +138,7 @@ export default function RecordForm({
           <button
             type="button"
             className={styles.btnAdd}
-            onClick={() => setItems(prev => [...prev, emptyItem()])}
+            onClick={handleAddItem}
           >
             + Add Asset
           </button>
@@ -118,12 +153,14 @@ export default function RecordForm({
         {items.map((item, index) => (
           <AssetItemForm
             key={index}
+            ref={el => setItemRef(index, el)}
             item={item}
             index={index}
             onChange={handleItemChange}
             onRemove={handleItemRemove}
             customOptions={customOptions}
             onCustomOptionAdded={handleCustomOptionAdded}
+            highlight={index === newItemIndex}
           />
         ))}
       </div>

@@ -46,7 +46,8 @@
   background: var(--color-surface);
   border-radius: 12px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table {
@@ -112,4 +113,21 @@
 
 .btnView:hover {
   background: var(--color-primary-light);
+}
+
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .btnNew {
+    width: 100%;
+    text-align: center;
+  }
+
+  .table {
+    min-width: 560px;
+  }
 }

@@ -6,6 +6,26 @@
   margin-bottom: 12px;
 }
 
+.cardNew {
+  border-color: var(--color-primary);
+  background: #f0f4ff;
+  box-shadow: 0 0 0 2px var(--color-primary-light);
+}
+
+.newPill {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  background: var(--color-primary);
+  color: white;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
 .cardHeader {
   display: flex;
   align-items: center;
@@ -166,4 +186,10 @@
 
 .btnCancel:hover {
   background: var(--color-bg);
+}
+
+@media (max-width: 480px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
 }

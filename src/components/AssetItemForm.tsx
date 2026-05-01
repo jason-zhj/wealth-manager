@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, forwardRef } from 'react';
 import { RecordItem, CustomOption } from '../lib/types';
 import { DEFAULT_CATEGORIES, DEFAULT_CURRENCIES, DEFAULT_PLACE_TYPES, DEFAULT_PLACES, RISK_LEVELS } from '../lib/constants';
+import { formatLabel, placeTypesForCategory } from '../lib/labels';
 import { upsertCustomOption } from '../lib/api';
 import styles from './AssetItemForm.module.css';
 
@@ -11,9 +12,13 @@ interface Props {
   onRemove: (index: number) => void;
   customOptions: CustomOption[];
   onCustomOptionAdded: (option: CustomOption) => void;
+  highlight?: boolean;
 }
 
-export default function AssetItemForm({ item, index, onChange, onRemove, customOptions, onCustomOptionAdded }: Props) {
+const AssetItemForm = forwardRef<HTMLDivElement, Props>(function AssetItemForm(
+  { item, index, onChange, onRemove, customOptions, onCustomOptionAdded, highlight = false },
+  ref
+) {
   const [collapsed, setCollapsed] = useState(false);
   const [addingCustom, setAddingCustom] = useState<'category' | 'place_type' | 'place' | null>(null);
   const [customInputValue, setCustomInputValue] = useState('');
@@ -34,6 +39,10 @@ export default function AssetItemForm({ item, index, onChange, onRemove, customO
 
   const allCategories = [...DEFAULT_CATEGORIES, ...customCategories];
   const allPlaceTypes = [...DEFAULT_PLACE_TYPES, ...customPlaceTypes];
+
+  // Filter place types based on the selected category
+  const filteredPlaceTypes = placeTypesForCategory(item.category, allPlaceTypes);
+
   const defaultPlacesForType = DEFAULT_PLACES[item.place_type] ?? [];
   const allPlaces = [...defaultPlacesForType, ...customPlaces];
 
@@ -43,7 +52,6 @@ export default function AssetItemForm({ item, index, onChange, onRemove, customO
     setSaving(true);
     try {
       await upsertCustomOption(field, value);
-      // Optimistically add to local state
       const newOption: CustomOption = {
         id: `temp-${Date.now()}`,
         user_id: '',
@@ -68,9 +76,16 @@ export default function AssetItemForm({ item, index, onChange, onRemove, customO
       setCustomInputValue('');
     } else {
       onChange(index, field, val);
-      // Reset place when place_type changes
       if (field === 'place_type') {
         onChange(index, 'place', '');
+      }
+      // When category changes, check if current place_type is still valid
+      if (field === 'category') {
+        const newFilteredTypes = placeTypesForCategory(val, allPlaceTypes);
+        if (item.place_type && !newFilteredTypes.includes(item.place_type)) {
+          onChange(index, 'place_type', '');
+          onChange(index, 'place', '');
+        }
       }
     }
   };
@@ -105,15 +120,19 @@ export default function AssetItemForm({ item, index, onChange, onRemove, customO
   );
 
   return (
-    <div className={styles.card}>
+    <div
+      ref={ref}
+      className={`${styles.card} ${highlight ? styles.cardNew : ''}`}
+    >
       <div className={styles.cardHeader} onClick={() => setCollapsed(c => !c)}>
         <span className={styles.cardTitle}>
-          {item.name || item.category || `Asset ${index + 1}`}
+          {item.name || (item.category ? formatLabel(item.category) : `Asset ${index + 1}`)}
           {item.amount > 0 && (
             <span className={styles.cardAmount}>
               {item.currency} {item.amount.toLocaleString()}
             </span>
           )}
+          {highlight && <span className={styles.newPill}>New</span>}
         </span>
         <div className={styles.cardActions} onClick={e => e.stopPropagation()}>
           <button
@@ -142,7 +161,7 @@ export default function AssetItemForm({ item, index, onChange, onRemove, customO
                   onChange={handleSelectChange('category')}
                 >
                   <option value="">Select category...</option>
-                  {allCategories.map(c => <option key={c} value={c}>{c}</option>)}
+                  {allCategories.map(c => <option key={c} value={c}>{formatLabel(c)}</option>)}
                   <option value="__custom__">+ Add custom...</option>
                 </select>
               )}
@@ -172,7 +191,7 @@ export default function AssetItemForm({ item, index, onChange, onRemove, customO
                   onChange={handleSelectChange('place_type')}
                 >
                   <option value="">Select place type...</option>
-                  {allPlaceTypes.map(p => <option key={p} value={p}>{p}</option>)}
+                  {filteredPlaceTypes.map(p => <option key={p} value={p}>{formatLabel(p)}</option>)}
                   <option value="__custom__">+ Add custom...</option>
                 </select>
               )}
@@ -189,7 +208,7 @@ export default function AssetItemForm({ item, index, onChange, onRemove, customO
                   onChange={handleSelectChange('place')}
                 >
                   <option value="">Select place...</option>
-                  {allPlaces.map(p => <option key={p} value={p}>{p}</option>)}
+                  {allPlaces.map(p => <option key={p} value={p}>{formatLabel(p)}</option>)}
                   <option value="__custom__">+ Add custom...</option>
                 </select>
               )}
@@ -227,10 +246,14 @@ export default function AssetItemForm({ item, index, onChange, onRemove, customO
               <input
                 type="number"
                 className={styles.input}
-                value={item.expected_annual_yield || ''}
+                value={item.expected_annual_yield ?? ''}
                 min="0"
                 step="0.1"
-                onChange={e => onChange(index, 'expected_annual_yield', parseFloat(e.target.value) || 0)}
+                onChange={e => onChange(
+                  index,
+                  'expected_annual_yield',
+                  e.target.value === '' ? 0 : parseFloat(e.target.value)
+                )}
               />
             </div>
 
@@ -241,7 +264,7 @@ export default function AssetItemForm({ item, index, onChange, onRemove, customO
                 value={item.risk_level}
                 onChange={handleSelectChange('risk_level')}
               >
-                {RISK_LEVELS.map(r => <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>)}
+                {RISK_LEVELS.map(r => <option key={r} value={r}>{formatLabel(r)}</option>)}
               </select>
             </div>
           </div>
@@ -260,4 +283,6 @@ export default function AssetItemForm({ item, index, onChange, onRemove, customO
       )}
     </div>
   );
-}
+});
+
+export default AssetItemForm;
