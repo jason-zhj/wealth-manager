@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { RecordItem, CustomOption } from '../lib/types';
-import { fetchCustomOptions } from '../lib/api';
+import { fetchCustomOptions } from '../lib/dataApi';
 import AssetItemForm from './AssetItemForm';
 import styles from './RecordForm.module.css';
 

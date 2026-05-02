@@ -4,6 +4,51 @@
   background: var(--color-bg);
 }
 
+/* ── Guest banner ─────────────────────────────────── */
+.guestBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: #92400e;
+}
+
+.guestBannerLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 600;
+  color: #b45309;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.guestBannerLink:hover {
+  color: #92400e;
+}
+
+.guestBannerClose {
+  background: none;
+  border: none;
+  padding: 2px 6px;
+  font-size: 13px;
+  color: #b45309;
+  cursor: pointer;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.guestBannerClose:hover {
+  background: #fef3c7;
+}
+
 .mainContent {
   flex: 1;
   padding: 32px;

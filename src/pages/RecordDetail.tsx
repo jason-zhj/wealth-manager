@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { WealthRecord, RecordItem, CustomOption, ExchangeRates } from '../lib/types';
-import { fetchRecordWithItems, updateRecord, fetchCustomOptions } from '../lib/api';
+import { fetchRecordWithItems, updateRecord, fetchCustomOptions } from '../lib/dataApi';
 import { getExchangeRates } from '../lib/currency';
 import { FALLBACK_RATES } from '../lib/constants';
 import { validateItems } from '../components/RecordForm';

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { WealthRecord, RecordItem } from '../lib/types';
-import { fetchRecords } from '../lib/api';
+import { fetchRecords } from '../lib/dataApi';
 import { RISK_COLOR } from '../lib/constants';
 import styles from './RecordsList.module.css';
 

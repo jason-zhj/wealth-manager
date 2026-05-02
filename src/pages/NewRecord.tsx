@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { RecordItem } from '../lib/types';
-import { createRecord } from '../lib/api';
+import { createRecord } from '../lib/dataApi';
 import RecordForm from '../components/RecordForm';
 import styles from './PageShared.module.css';
 

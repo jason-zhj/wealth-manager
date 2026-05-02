@@ -2,7 +2,7 @@ import { useState, useMemo, forwardRef } from 'react';
 import { RecordItem, CustomOption } from '../lib/types';
 import { DEFAULT_CATEGORIES, DEFAULT_CURRENCIES, DEFAULT_PLACE_TYPES, DEFAULT_PLACES, RISK_LEVELS } from '../lib/constants';
 import { formatLabel, placeTypesForCategory } from '../lib/labels';
-import { upsertCustomOption } from '../lib/api';
+import { upsertCustomOption } from '../lib/dataApi';
 import styles from './AssetItemForm.module.css';
 
 interface Props {

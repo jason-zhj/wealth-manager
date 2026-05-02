@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { WealthRecord, DisplayCurrency, ExchangeRates } from '../lib/types';
-import { fetchLatestRecords, fetchRecordOneYearAgo } from '../lib/api';
+import { fetchLatestRecords, fetchRecordOneYearAgo } from '../lib/dataApi';
 import { getExchangeRates } from '../lib/currency';
 import { FALLBACK_RATES, CATEGORY_COLORS, RISK_COLOR } from '../lib/constants';
 import CurrencyToggle from '../components/CurrencyToggle';
